@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CHECK LIST FOR SHIPPING DOCUMENTS</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+    body { 
+        font-family: "Segoe UI", sans-serif; 
+        background: #fdfaff; 
+        padding: 30px; 
+        color: #444; 
+    }
+    h2 { 
+        text-align: center; 
+        color: #8b7abd; 
+        font-weight: 600; 
+        margin-bottom: 15px;
+    }
+    #title { 
+        width: 60%; 
+        padding: 8px; 
+        border-radius: 8px; 
+        border: 1px solid #ccb7ff; 
+        outline: none; 
+        margin-bottom: 20px;
+    }
+    table { 
+        width: 100%; 
+        margin-top: 20px; 
+        border-collapse: collapse; 
+    }
+    th { 
+        background: #e9ddff; 
+        padding: 10px; 
+        border-radius: 6px; 
+        text-align: left;
+    }
+    td { 
+        padding: 6px 6px; 
+        border-bottom: 1px solid #e1d9f5; 
+        vertical-align: top;
+    }
+    tr.checked { 
+        background-color: #dfffe0; 
+    }
+    .section-header td {
+        font-weight: bold;
+        background: #f3e8ff;
+        text-align: left;
+        font-size: 1em;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #bfa3ff;
+    }
+
+    .checkbox-cell { text-align: center; cursor: pointer; }
+    .checkbox {
+        display: inline-block;
+        width: 18px; 
+        height: 18px;
+        border: 2px solid #bfa3ff;
+        border-radius: 4px;
+        line-height: 15px;
+        font-size: 14px;
+        color: #5d4ba0;
+        font-weight: bold;
+        user-select: none;
+        transition: all 0.2s ease;
+    }
+    .checkbox:hover { transform: scale(1.1); background: #f3edff; }
+    tr.checked .checkbox {
+        background: #c9f9ca;
+        color: #2d7030;
+        border-color: #89d38f;
+    }
+
+    input.comment {
+        width: 120px; 
+        padding: 2px 5px; 
+        border: none;                 
+        border-bottom: 1px solid #ccb7ff; 
+        outline: none; 
+        font-size: 0.95em;
+        background: transparent;
+    }
+    input.comment:focus {
+        border-bottom: 2px solid #8b7abd;
+    }
+
+    button { 
+        background: #bfa3ff; 
+        border: none; 
+        padding: 10px 18px; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        color: white; 
+        font-weight: 500; 
+        margin-top: 15px;
+        margin-right: 10px;
+    }
+    button:hover { background: #a78af5; }
+</style>
+</head>
+<body>
+
+<h2>CHECK LIST FOR SHIPPING DOCUMENTS</h2>
+<label>Title: </label><input type="text" id="title" placeholder="Enter list title...">
+
+<table id="checklistTable">
+<tr><th>Check</th><th>Item</th><th>Comment</th></tr>
+</table>
+
+<!-- Buttons side by side -->
+<div>
+    <button onclick="downloadExcel()">Download as Excel</button>
+    <button onclick="downloadTXT()">Download as TXT</button>
+</div>
+
+<script>
+const table = document.getElementById("checklistTable");
+
+// First four rows before any header
+const preInvoiceRows = [
+   //"note: …………………….."
+];  
+
+preInvoiceRows.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td class="checkbox-cell"><span class="checkbox"></span></td>
+        <td>${item}</td>
+        <td><input class="comment" type="text"></td>
+    `;
+    table.appendChild(tr);
+});
+
+const sections = [
+    {
+        header: "1- Commercial Invoice",
+        items: [
+            "Date and N° of the commercial invoice",
+            "Supplier’s details (full name/Address/bank details)", 
+            "ELSEWEDY ELECTRIC ALGERIE SPA details",
+            "NIF 000 616 0972 68914", 
+            "RESALES NIF 000 616 0972 68914 44005",
+            "Payment terms/LC N° & Date",
+            "Delivery terms Incoterm 2020", 
+            "Description of goods",
+            "Weight (Net /Gross) + Packages numbers", 
+            "Quantity and Unit of measurement",
+            "Unit prices/FOB Amount + Freight cost", 
+            "Amount in Words and Digits",
+            "Currency",
+            "N° of EUR1 Declaration (if available)",
+            "Country of origin & supply of each item",
+            "HS Code of each item",
+            "Signature and Stamp",
+            "PI number as mentionned on ALGEX for resales"
+        ]
+    },
+    {
+        header: "2- BL/AWB",
+        items: [
+            "Bill Of Lading number / Airway Number",
+            "Shipper details (full name & address)",
+            "\"On behalf of the seller\" in case the shipper/seller are different.",
+             "Consignee details (Bank or ELSEWEDY ALGERIA details)",
+            "Notify details (ELSEWEDY ELECTRIC ALGERIE SPA details)",
+            "NIF 000 616 0972 68914",
+            "RESALES NIF 000 616 0972 68914 44005",
+            "LC N° & Date",
+            "Goods Description",
+            "Weight (Net /Gross) + Packages numbers",
+            "Free Time at POD",
+            "\"Shipped on Board\"",
+            "POD Alger Algeria - Otherwise as agreed",
+            "Port of Loading name",
+            "\"Freight prepaid\" for CFR Shipments",
+            "\"Freight Collect\" for FOB or FCA Shipments",
+            "Carrier / Shipping Line agent's details in Algeria",
+            "Type and Number of containers on the BL",
+            "Container ID number and Seal number"
+        ]
+    },
+    {
+        header: "3- Packing List",
+        items: [
+            "ELSEWEDY ELECTRIC ALGERIE SPA details",
+            "Description of goods",
+            "Weight (Net /Gross) + Packages numbers",
+            "Type of Package and dimension (pallete, box, coil, etc)" 
+        ]
+    },
+    {
+        header: "4- Certificate of Origin",
+        items: [
+             "Supplier's details",
+            "ELSEWEDY ELECTRIC ALGERIE SPA details",
+            "Goods description",
+            "Invoice N°/ LC N° & Date",
+            "Stamp Of chamber of commerce",
+            "Stamp of issuing authority on COO GZALE",
+            "Supplier's stamps on case 11 on COO GZALE",
+            "Country of origin of each item",
+            "Weight (Net /Gross) + Packages numbers"
+        ]
+    },
+    {
+        header: "5-EUR1",
+        items: [
+            "Supplier's details",
+            "ELSEWEDY ELECTRIC ALGERIE SPA details",
+            "Goods description",
+            "Invoice N°/ LC N° & Date",
+            "Supplier stamp",
+            "Customs stamp",
+            "EX 1 N°",
+            "Country of origin of each item",
+            "Weight Gross …..........Net: …....",
+            "Means of Transport on Case 4 \"Maritime or Air\""
+        ]
+    }
+];
+
+sections.forEach(sec => {
+    const trHeader = document.createElement("tr");
+    trHeader.classList.add("section-header");
+    trHeader.innerHTML = `<td colspan="3">${sec.header}</td>`;
+    table.appendChild(trHeader);
+
+    sec.items.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="checkbox-cell"><span class="checkbox"></span></td>
+            <td>${item}</td>
+            <td><input class="comment" type="text"></td>
+        `;
+        table.appendChild(tr);
+    });
+});
+
+// Toggle checkbox
+document.addEventListener("click", e => {
+    if(e.target.classList.contains("checkbox")){
+        const box = e.target;
+        const row = box.closest("tr");
+        box.textContent = box.textContent === "X" ? "" : "X";
+        row.classList.toggle("checked");
+    }
+});
+
+// Download as Excel
+function downloadExcel(){
+    const wb = XLSX.utils.book_new();
+    const data = [];
+    let title = document.getElementById("title").value || "CHECK_LIST_FOR_SHIPPING_DOCUMENTS";
+
+    // Replace invalid filename characters
+    title = title.replace(/[/\\?%*:|"<>]/g, "_");
+
+    const dateTime = new Date().toLocaleString();
+
+    data.push(["Title:", title]);
+    data.push(["Date & Time:", dateTime]);
+    data.push([]);
+    data.push(["Status","Item","Comment"]);
+
+    // Skip the table header (i=1)
+    for(let i=1;i<table.rows.length;i++){
+        const cells = table.rows[i].cells;
+        const checkbox = cells[0].querySelector(".checkbox");
+        let status;
+        if(checkbox){ 
+            status = checkbox.textContent || "";
+        }
+        else{ 
+            data.push([cells[0]].textContent || ""); 
+            continue;
+        }
+        const itemText = cells[1].textContent;
+        const commentValue = cells[2].querySelector("input")?.value || "";
+        data.push([status, itemText, commentValue]);
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Checklist");
+
+    try {
+        XLSX.writeFile(wb, `${title}.xlsx`);
+    } catch (err) {
+        console.error("Excel download failed:", err);
+        alert("Failed to download Excel. Please try again.");
+    }
+}
+
+function downloadTXT() {
+    let title = document.getElementById("title").value || "CHECK_LIST_FOR_SHIPPING_DOCUMENTS";
+    title = title.replace(/[/\\?%*:|"<>]/g, "_");
+    const dateTime = new Date().toLocaleString();
+
+    let txtContent = `Title: ${title}\nDate & Time: ${dateTime}\n\n`;
+
+    let includeHeader = false;
+    let currentHeader = "";
+
+    for (let i = 1; i < table.rows.length; i++) {
+        const row = table.rows[i];
+
+        // Section header row
+        if (row.classList.contains("section-header")) {
+            currentHeader = row.cells[0].textContent.trim();
+            includeHeader = false; // reset for new section
+            continue;
+        }
+
+        const commentInput = row.cells[2]?.querySelector("input.comment");
+
+        if (commentInput && commentInput.value.trim() !== "") {
+            if (!includeHeader) {
+                txtContent += `${currentHeader}\n\n`; // include header once
+                includeHeader = true;
+            }
+            const itemText = row.cells[1].textContent.trim();
+            const comment = commentInput.value.trim();
+            txtContent += `${itemText}\nComment: ${comment}\n\n`;
+        }
+    }
+
+    const blob = new Blob([txtContent], { type: "text/plain;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${title}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+</script>
+
+</body>
+</html>
