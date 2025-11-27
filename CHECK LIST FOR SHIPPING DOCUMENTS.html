@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CHECK LIST FOR SHIPPING DOCUMENTS</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+    body { 
+        font-family: "Segoe UI", sans-serif; 
+        background: #fdfaff; 
+        padding: 30px; 
+        color: #444; 
+    }
+    h2 { 
+        text-align: center; 
+        color: #8b7abd; 
+        font-weight: 600; 
+        margin-bottom: 15px;
+    }
+    #title { 
+        width: 60%; 
+        padding: 8px; 
+        border-radius: 8px; 
+        border: 1px solid #ccb7ff; 
+        outline: none; 
+        margin-bottom: 20px;
+    }
+    table { 
+        width: 100%; 
+        margin-top: 20px; 
+        border-collapse: collapse; 
+    }
+    th { 
+        background: #e9ddff; 
+        padding: 10px; 
+        border-radius: 6px; 
+        text-align: left;
+    }
+    td { 
+        padding: 6px 6px; 
+        border-bottom: 1px solid #e1d9f5; 
+        vertical-align: top;
+    }
+    tr.checked { 
+        background-color: #dfffe0; 
+    }
+    .section-header td {
+        font-weight: bold;
+        background: #f3e8ff;
+        text-align: left;
+        font-size: 1em;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #bfa3ff;
+    }
+
+    .checkbox-cell { text-align: center; cursor: pointer; }
+    .checkbox {
+        display: inline-block;
+        width: 18px; 
+        height: 18px;
+        border: 2px solid #bfa3ff;
+        border-radius: 4px;
+        line-height: 15px;
+        font-size: 14px;
+        color: #5d4ba0;
+        font-weight: bold;
+        user-select: none;
+        transition: all 0.2s ease;
+    }
+    .checkbox:hover { transform: scale(1.1); background: #f3edff; }
+    tr.checked .checkbox {
+        background: #c9f9ca;
+        color: #2d7030;
+        border-color: #89d38f;
+    }
+
+    input.comment {
+        width: 120px; 
+        padding: 2px 5px; 
+        border: none;                 
+        border-bottom: 1px solid #ccb7ff; 
+        outline: none; 
+        font-size: 0.95em;
+        background: transparent;
+    }
+    input.comment:focus {
+        border-bottom: 2px solid #8b7abd;
+    }
+
+    button { 
+        background: #bfa3ff; 
+        border: none; 
+        padding: 10px 18px; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        color: white; 
+        font-weight: 500; 
+        margin-top: 15px;
+    }
+    button:hover { background: #a78af5; }
+</style>
+</head>
+<body>
+
+<h2>CHECK LIST FOR SHIPPING DOCUMENTS</h2>
+<label>Title: </label><input type="text" id="title" placeholder="Enter list title...">
+
+<table id="checklistTable">
+<tr><th>Check</th><th>Item</th><th>Comment</th></tr>
+</table>
+
+<button onclick="downloadExcel()">Download as Excel</button>
+
+<script>
+const table = document.getElementById("checklistTable");
+
+// First four rows before any header
+const preInvoiceRows = [
+    "Supplier: ……………………..",
+    "Invoice N°:……………",
+    "PO N°: ……………………….",
+    "Amount:"
+];
+
+preInvoiceRows.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td class="checkbox-cell"><span class="checkbox"></span></td>
+        <td>${item}</td>
+        <td><input class="comment" type="text"></td>
+    `;
+    table.appendChild(tr);
+});
+
+const sections = [
+    {
+        header: "1- INVOICE",
+        items: [
+            "Date and N° of the invoice",
+            "Supplier’s full name /Address/ bank details", 
+            "El Sewedy name and address",
+            "NIF 000 616 0972 68914", 
+            "Payment terms / LC N° & Date",
+            "Delivery terms", 
+            "Description of goods",
+            "Weight (Net ….......... Gross….......)", 
+            "Quantity and Unit of measurement",
+            "Unit / total price + freight cost", 
+            "Amount in Words =Digits",
+            "Currency"
+        ]
+    },
+    {
+        header: "2- BL",
+        items: [
+            "Shipper", 
+            "Consignee & Notify", 
+            "NIF 000 616 0972 68914",
+            "Goods Description", 
+            "LC N° & Date",
+            "Weight Gross …...............Net: …..............",
+            "21 Days Free Time at POD",
+            "Shipped on Board / Freight prepaid CFR / Freight Collect FOB",
+            "Port of Discharge Alger Algeria DZALG"
+        ]
+    },
+    {
+        header: "3- CERTIFICATE OF ORIGIN:",
+        items: [
+            "Goods description", 
+            "Supplier's details", 
+            "El Sewedy details",
+            "Invoice N°/ LC N° & Date", 
+            "Stamp Of chamber of commerce",
+            "Stamp of issuing authority on GZALE", 
+            "Stamp of supplier on case 11 on GZALE",
+            "Country of origin", 
+            "Weight (Net ….......... Gross….......)" 
+        ]
+    },
+    {
+        header: "4- EUR1",
+        items: [
+            "Goods description", 
+            "Supplier's details", 
+            "El Sewedy details",
+            "Invoice N°/ LC N° & Date", 
+            "Supplier stamp", 
+            "Customs stamp",
+            "EX 1 N°", 
+            "Country of origin", 
+            "Weight Gross …..........Net: …...."
+        ]
+    },
+    {
+        header: "5-PACKING LIST",
+        items: [
+            "Description of goods",
+            "Weight Gross …..........Net: ….......", 
+            "NIF 000 616 0972 68914",
+            "Supplier’s full name /Address/ bank details", 
+            "El Sewedy name and address"
+        ]
+    }
+];
+
+sections.forEach(sec => {
+    const trHeader = document.createElement("tr");
+    trHeader.classList.add("section-header");
+    trHeader.innerHTML = `<td colspan="3">${sec.header}</td>`;
+    table.appendChild(trHeader);
+
+    sec.items.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="checkbox-cell"><span class="checkbox"></span></td>
+            <td>${item}</td>
+            <td><input class="comment" type="text"></td>
+        `;
+        table.appendChild(tr);
+    });
+});
+
+// Toggle checkbox
+document.addEventListener("click", e => {
+    if(e.target.classList.contains("checkbox")){
+        const box = e.target;
+        const row = box.closest("tr");
+        box.textContent = box.textContent === "X" ? "" : "X";
+        row.classList.toggle("checked");
+    }
+});
+
+// Download as Excel
+function downloadExcel(){
+    const wb = XLSX.utils.book_new();
+    const data = [];
+    let title = document.getElementById("title").value || "CHECK_LIST_FOR_SHIPPING_DOCUMENTS";
+
+    // Replace invalid filename characters
+    title = title.replace(/[/\\?%*:|"<>]/g, "_");
+
+    const dateTime = new Date().toLocaleString();
+
+    data.push(["Title:", title]);
+    data.push(["Date & Time:", dateTime]);
+    data.push([]);
+    data.push(["Status","Item","Comment"]);
+
+    // Skip the table header (i=1)
+    for(let i=1;i<table.rows.length;i++){
+        const cells = table.rows[i].cells;
+        const checkbox = cells[0].querySelector(".checkbox");
+        let status;
+        if(checkbox){ 
+            status = checkbox.textContent || "";
+        }
+        else{ 
+            data.push([cells[0]].textContent || ""); 
+            continue;
+        }
+        const itemText = cells[1].textContent;
+        const commentValue = cells[2].querySelector("input")?.value || "";
+        data.push([status, itemText, commentValue]);
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Checklist");
+
+    try {
+        XLSX.writeFile(wb, `${title}.xlsx`);
+    } catch (err) {
+        console.error("Excel download failed:", err);
+        alert("Failed to download Excel. Please try again.");
+    }
+}
+</script>
+
+</body>
+</html>
